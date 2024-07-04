@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+
+COMPOSE="docker-compose -f docker/docker-compose.yml"
+APP_CONTAINER_NAME="app.web"
+
+
+if [ $# -gt 0 ];then
+    if [ "$1" == "stats" ]; then
+        docker stats --all --format "table {{.ID}}\t{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}"
+    elif [ "$1" == "bash" ]; then
+        shift 1
+        docker exec -it $APP_CONTAINER_NAME bash "$@"
+    elif [ "$1" == "php" ]; then
+        shift 1
+        $COMPOSE exec $APP_CONTAINER_NAME php "$@"
+    elif [ "$1" == "composer" ]; then
+        shift 1
+        $COMPOSE exec -u nginx $APP_CONTAINER_NAME composer "$@"
+    elif [ "$1" == "logs" ]; then
+        $COMPOSE logs -f --tail=100
+    # If "rebuild" is used, rebuild docker containers
+    elif [ "$1" == "rebuild" ]; then
+        $COMPOSE down
+        $COMPOSE up -d --build
+    else
+        $COMPOSE "$@"
+    fi
+else
+    $COMPOSE ps
+fi

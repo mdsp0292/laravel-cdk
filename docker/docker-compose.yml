@@ -1,0 +1,41 @@
+services:
+    #public app
+    app:
+        build: ./app/
+        container_name: app.web
+        restart: unless-stopped
+        ports:
+            - "8080:80"
+            - "10000:10000"
+        volumes:
+            - ../laravel:/var/www
+        networks:
+            - app-network
+
+    #MySQL Service
+    db:
+        command: --default-authentication-plugin=mysql_native_password
+        container_name: app.mysql
+        build: ./mysql/
+        ports:
+            - "3306:3306"
+        volumes:
+            - ./mysql/data:/var/lib/mysql/
+            - ./mysql/my.cnf:/etc/mysql/my.cnf
+        networks:
+            - app-network
+#    redis:
+#        container_name: app.redis
+#        build: ./redis
+#        restart: always
+#        ports:
+#            - "6379:6379"
+
+#Docker Networks
+networks:
+    app-network:
+        driver: bridge
+#Volumes
+volumes:
+    dbdata:
+        driver: local
